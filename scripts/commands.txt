@@ -1,0 +1,36 @@
+# PULL MONGO DOCKER IMAGE
+docker pull mongo
+
+# CREATE DOCKER NETWORK FOR MONGO
+docker network create mongo_net
+
+# CREATE MONGO INSTANCE
+docker run -d -p 27018:27017 --net mongo_net --name r0_master mongo:latest --replSet mongoRepSet
+docker run -d -p 27019:27017 --net mongo_net --name r1_secondary mongo:latest --replSet mongoRepSet
+docker run -d -p 27020:27017 --net mongo_net --name r2_secondary mongo:latest --replSet mongoRepSet
+
+
+# EXECT DOCKER INSTANCE IN r0_master
+docker exec -it r0_master bash
+mongo
+rs.status()
+config = {"_id": "mongoRepSet", "members": [{_id: 0, host: "192.168.1.10:27018"}, {_id: 1, host: "192.168.1.10:27019"}, {_id: 2, host: "192.168.1.10:27020"}]}
+rs.initiate(config)
+show dbs
+rs.status()
+show dbs
+use test
+db.test.insert({name: "user1"})
+db.test.find()
+
+
+
+# OPEN ANOTHER TERMINAL 
+docker exec -it r1_secondary bash
+mongo	
+show dbs
+rs.slaveOk()
+rs.secondaryOk()
+use test
+db.test.find()
+mongosh 192.168.1.10:27018/test

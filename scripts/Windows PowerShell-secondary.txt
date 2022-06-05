@@ -1,0 +1,154 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Try the new cross-platform PowerShell https://aka.ms/pscore6
+
+PS C:\Users\tvtruong> docker exec -it r1_secondary bash
+root@c0678bf98809:/# mongo
+MongoDB shell version v5.0.9
+connecting to: mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb
+Implicit session: session { "id" : UUID("ebc187a2-7b10-49b2-8ada-ac362de8bd15") }
+MongoDB server version: 5.0.9
+================
+Warning: the "mongo" shell has been superseded by "mongosh",
+which delivers improved usability and compatibility.The "mongo" shell has been deprecated and will be removed in
+an upcoming release.
+For installation instructions, see
+https://docs.mongodb.com/mongodb-shell/install/
+================
+Welcome to the MongoDB shell.
+For interactive help, type "help".
+For more comprehensive documentation, see
+        https://docs.mongodb.com/
+Questions? Try the MongoDB Developer Community Forums
+        https://community.mongodb.com
+---
+The server generated these startup warnings when booting:
+        2022-06-05T10:57:08.392+00:00: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/core/prodnotes-filesystem
+        2022-06-05T10:57:09.158+00:00: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+        2022-06-05T10:57:09.158+00:00: /sys/kernel/mm/transparent_hugepage/enabled is 'always'. We suggest setting it to 'never'
+---
+---
+        Enable MongoDB's free cloud-based monitoring service, which will then receive and display
+        metrics about your deployment (disk utilization, CPU, operation statistics, etc).
+
+        The monitoring data will be available on a MongoDB website with a unique URL accessible to you
+        and anyone you share the URL with. MongoDB may use this information to make product
+        improvements and to suggest MongoDB products and deployment options to you.
+
+        To enable free monitoring, run the following command: db.enableFreeMonitoring()
+        To permanently disable this reminder, run the following command: db.disableFreeMonitoring()
+---
+mongoRepSet:SECONDARY> show dbs
+uncaught exception: Error: listDatabases failed:{
+        "topologyVersion" : {
+                "processId" : ObjectId("629c8c04edbfacc6d7f65d1f"),
+                "counter" : NumberLong(4)
+        },
+        "ok" : 0,
+        "errmsg" : "not master and slaveOk=false",
+        "code" : 13435,
+        "codeName" : "NotPrimaryNoSecondaryOk",
+        "$clusterTime" : {
+                "clusterTime" : Timestamp(1654427346, 1),
+                "signature" : {
+                        "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+                        "keyId" : NumberLong(0)
+                }
+        },
+        "operationTime" : Timestamp(1654427346, 1)
+} :
+_getErrorWithCode@src/mongo/shell/utils.js:25:13
+Mongo.prototype.getDBs/<@src/mongo/shell/mongo.js:145:19
+Mongo.prototype.getDBs@src/mongo/shell/mongo.js:97:12
+shellHelper.show@src/mongo/shell/utils.js:956:13
+shellHelper@src/mongo/shell/utils.js:838:15
+@(shellhelp2):1:1
+mongoRepSet:SECONDARY> show dbs
+uncaught exception: Error: listDatabases failed:{
+        "topologyVersion" : {
+                "processId" : ObjectId("629c8c04edbfacc6d7f65d1f"),
+                "counter" : NumberLong(4)
+        },
+        "ok" : 0,
+        "errmsg" : "not master and slaveOk=false",
+        "code" : 13435,
+        "codeName" : "NotPrimaryNoSecondaryOk",
+        "$clusterTime" : {
+                "clusterTime" : Timestamp(1654427346, 1),
+                "signature" : {
+                        "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+                        "keyId" : NumberLong(0)
+                }
+        },
+        "operationTime" : Timestamp(1654427346, 1)
+} :
+_getErrorWithCode@src/mongo/shell/utils.js:25:13
+Mongo.prototype.getDBs/<@src/mongo/shell/mongo.js:145:19
+Mongo.prototype.getDBs@src/mongo/shell/mongo.js:97:12
+shellHelper.show@src/mongo/shell/utils.js:956:13
+shellHelper@src/mongo/shell/utils.js:838:15
+@(shellhelp2):1:1
+mongoRepSet:SECONDARY> rs.slaveOk()
+WARNING: slaveOk() is deprecated and may be removed in the next major release. Please use secondaryOk() instead.
+mongoRepSet:SECONDARY> rs.secondaryOk()
+mongoRepSet:SECONDARY> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+test    0.000GB
+mongoRepSet:SECONDARY> use test
+switched to db test
+mongoRepSet:SECONDARY> db.test.find
+function(query, fields, limit, skip, batchSize, options) {
+    var cursor = new DBQuery(this._mongo,
+                             this._db,
+                             this,
+                             this._fullName,
+                             this._massageObject(query),
+                             fields,
+                             limit,
+                             skip,
+                             batchSize,
+                             options || this.getQueryOptions());
+
+    {
+        const session = this.getDB().getSession();
+
+        const readPreference = session._getSessionAwareClient().getReadPreference(session);
+        if (readPreference !== null) {
+            cursor.readPref(readPreference.mode, readPreference.tags);
+        }
+
+        const client = session._getSessionAwareClient();
+        const readConcern = client.getReadConcern(session);
+        if (readConcern !== null &&
+            client.canUseReadConcern(session, cursor._convertToCommand(true))) {
+            cursor.readConcern(readConcern.level);
+        }
+    }
+
+    return cursor;
+}
+mongoRepSet:SECONDARY> db.test.find()
+{ "_id" : ObjectId("629c8e44f0fe7da1b04dd082"), "name" : "user1" }
+mongoRepSet:SECONDARY> db.test.insert({name: "user_secondary"})
+WriteCommandError({
+        "topologyVersion" : {
+                "processId" : ObjectId("629c8c04edbfacc6d7f65d1f"),
+                "counter" : NumberLong(4)
+        },
+        "ok" : 0,
+        "errmsg" : "not master",
+        "code" : 10107,
+        "codeName" : "NotWritablePrimary",
+        "$clusterTime" : {
+                "clusterTime" : Timestamp(1654427466, 1),
+                "signature" : {
+                        "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+                        "keyId" : NumberLong(0)
+                }
+        },
+        "operationTime" : Timestamp(1654427466, 1)
+})
+mongoRepSet:SECONDARY>

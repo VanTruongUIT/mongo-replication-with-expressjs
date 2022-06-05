@@ -1,0 +1,239 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Try the new cross-platform PowerShell https://aka.ms/pscore6
+
+PS C:\Users\tvtruong> docker ps
+CONTAINER ID   IMAGE          COMMAND                  CREATED              STATUS              PORTS                                           NAMES
+ef899e2054be   mongo:latest   "docker-entrypoint.s…"   33 seconds ago       Up 31 seconds       0.0.0.0:27020->27017/tcp, :::27020->27017/tcp   r2_secondary
+c0678bf98809   mongo:latest   "docker-entrypoint.s…"   40 seconds ago       Up 38 seconds       0.0.0.0:27019->27017/tcp, :::27019->27017/tcp   r1_secondary
+ff726b2b6a38   mongo:latest   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:27018->27017/tcp, :::27018->27017/tcp   r0_master
+PS C:\Users\tvtruong> docker exec -it r0_master bash
+root@ff726b2b6a38:/# mongo
+MongoDB shell version v5.0.9
+connecting to: mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb
+Implicit session: session { "id" : UUID("ddbed4a5-f744-4973-a7b7-5e5a56e5ff9e") }
+MongoDB server version: 5.0.9
+================
+Warning: the "mongo" shell has been superseded by "mongosh",
+which delivers improved usability and compatibility.The "mongo" shell has been deprecated and will be removed in
+an upcoming release.
+For installation instructions, see
+https://docs.mongodb.com/mongodb-shell/install/
+================
+Welcome to the MongoDB shell.
+For interactive help, type "help".
+For more comprehensive documentation, see
+        https://docs.mongodb.com/
+Questions? Try the MongoDB Developer Community Forums
+        https://community.mongodb.com
+---
+The server generated these startup warnings when booting:
+        2022-06-05T10:56:09.258+00:00: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/core/prodnotes-filesystem
+        2022-06-05T10:56:10.032+00:00: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+        2022-06-05T10:56:10.032+00:00: /sys/kernel/mm/transparent_hugepage/enabled is 'always'. We suggest setting it to 'never'
+---
+---
+        Enable MongoDB's free cloud-based monitoring service, which will then receive and display
+        metrics about your deployment (disk utilization, CPU, operation statistics, etc).
+
+        The monitoring data will be available on a MongoDB website with a unique URL accessible to you
+        and anyone you share the URL with. MongoDB may use this information to make product
+        improvements and to suggest MongoDB products and deployment options to you.
+
+        To enable free monitoring, run the following command: db.enableFreeMonitoring()
+        To permanently disable this reminder, run the following command: db.disableFreeMonitoring()
+---
+> rs.status()
+{
+        "ok" : 0,
+        "errmsg" : "no replset config has been received",
+        "code" : 94,
+        "codeName" : "NotYetInitialized"
+}
+> config = {"_id": "mongoRepSet", "members": [{_id: 0, host: "192.168.1.10:27018"}, {_id: 1, host: "192.168.1.10:27019"}, {_id: 2, host: "192.168.1.10:27020"}]}
+{
+        "_id" : "mongoRepSet",
+        "members" : [
+                {
+                        "_id" : 0,
+                        "host" : "192.168.1.10:27018"
+                },
+                {
+                        "_id" : 1,
+                        "host" : "192.168.1.10:27019"
+                },
+                {
+                        "_id" : 2,
+                        "host" : "192.168.1.10:27020"
+                }
+        ]
+}
+> rs.initiate(config)
+{ "ok" : 1 }
+mongoRepSet:SECONDARY> showd
+uncaught exception: ReferenceError: showd is not defined :
+@(shell):1:1
+mongoRepSet:PRIMARY> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+mongoRepSet:PRIMARY> rs.status()
+{
+        "set" : "mongoRepSet",
+        "date" : ISODate("2022-06-05T11:04:44.510Z"),
+        "myState" : 1,
+        "term" : NumberLong(1),
+        "syncSourceHost" : "",
+        "syncSourceId" : -1,
+        "heartbeatIntervalMillis" : NumberLong(2000),
+        "majorityVoteCount" : 2,
+        "writeMajorityCount" : 2,
+        "votingMembersCount" : 3,
+        "writableVotingMembersCount" : 3,
+        "optimes" : {
+                "lastCommittedOpTime" : {
+                        "ts" : Timestamp(1654427076, 1),
+                        "t" : NumberLong(1)
+                },
+                "lastCommittedWallTime" : ISODate("2022-06-05T11:04:36.297Z"),
+                "readConcernMajorityOpTime" : {
+                        "ts" : Timestamp(1654427076, 1),
+                        "t" : NumberLong(1)
+                },
+                "appliedOpTime" : {
+                        "ts" : Timestamp(1654427076, 1),
+                        "t" : NumberLong(1)
+                },
+                "durableOpTime" : {
+                        "ts" : Timestamp(1654427076, 1),
+                        "t" : NumberLong(1)
+                },
+                "lastAppliedWallTime" : ISODate("2022-06-05T11:04:36.297Z"),
+                "lastDurableWallTime" : ISODate("2022-06-05T11:04:36.297Z")
+        },
+        "lastStableRecoveryTimestamp" : Timestamp(1654427035, 1),
+        "electionCandidateMetrics" : {
+                "lastElectionReason" : "electionTimeout",
+                "lastElectionDate" : ISODate("2022-06-05T11:04:06.120Z"),
+                "electionTerm" : NumberLong(1),
+                "lastCommittedOpTimeAtElection" : {
+                        "ts" : Timestamp(1654427035, 1),
+                        "t" : NumberLong(-1)
+                },
+                "lastSeenOpTimeAtElection" : {
+                        "ts" : Timestamp(1654427035, 1),
+                        "t" : NumberLong(-1)
+                },
+                "numVotesNeeded" : 2,
+                "priorityAtElection" : 1,
+                "electionTimeoutMillis" : NumberLong(10000),
+                "numCatchUpOps" : NumberLong(0),
+                "newTermStartDate" : ISODate("2022-06-05T11:04:06.242Z"),
+                "wMajorityWriteAvailabilityDate" : ISODate("2022-06-05T11:04:07.705Z")
+        },
+        "members" : [
+                {
+                        "_id" : 0,
+                        "name" : "192.168.1.10:27018",
+                        "health" : 1,
+                        "state" : 1,
+                        "stateStr" : "PRIMARY",
+                        "uptime" : 515,
+                        "optime" : {
+                                "ts" : Timestamp(1654427076, 1),
+                                "t" : NumberLong(1)
+                        },
+                        "optimeDate" : ISODate("2022-06-05T11:04:36Z"),
+                        "lastAppliedWallTime" : ISODate("2022-06-05T11:04:36.297Z"),
+                        "lastDurableWallTime" : ISODate("2022-06-05T11:04:36.297Z"),
+                        "syncSourceHost" : "",
+                        "syncSourceId" : -1,
+                        "infoMessage" : "",
+                        "electionTime" : Timestamp(1654427046, 1),
+                        "electionDate" : ISODate("2022-06-05T11:04:06Z"),
+                        "configVersion" : 1,
+                        "configTerm" : 1,
+                        "self" : true,
+                        "lastHeartbeatMessage" : ""
+                },
+                {
+                        "_id" : 1,
+                        "name" : "192.168.1.10:27019",
+                        "health" : 1,
+                        "state" : 2,
+                        "stateStr" : "SECONDARY",
+                        "uptime" : 48,
+                        "optime" : {
+                                "ts" : Timestamp(1654427076, 1),
+                                "t" : NumberLong(1)
+                        },
+                        "optimeDurable" : {
+                                "ts" : Timestamp(1654427076, 1),
+                                "t" : NumberLong(1)
+                        },
+                        "optimeDate" : ISODate("2022-06-05T11:04:36Z"),
+                        "optimeDurableDate" : ISODate("2022-06-05T11:04:36Z"),
+                        "lastAppliedWallTime" : ISODate("2022-06-05T11:04:36.297Z"),
+                        "lastDurableWallTime" : ISODate("2022-06-05T11:04:36.297Z"),
+                        "lastHeartbeat" : ISODate("2022-06-05T11:04:44.274Z"),
+                        "lastHeartbeatRecv" : ISODate("2022-06-05T11:04:43.770Z"),
+                        "pingMs" : NumberLong(3),
+                        "lastHeartbeatMessage" : "",
+                        "syncSourceHost" : "192.168.1.10:27018",
+                        "syncSourceId" : 0,
+                        "infoMessage" : "",
+                        "configVersion" : 1,
+                        "configTerm" : 1
+                },
+                {
+                        "_id" : 2,
+                        "name" : "192.168.1.10:27020",
+                        "health" : 1,
+                        "state" : 2,
+                        "stateStr" : "SECONDARY",
+                        "uptime" : 48,
+                        "optime" : {
+                                "ts" : Timestamp(1654427076, 1),
+                                "t" : NumberLong(1)
+                        },
+                        "optimeDurable" : {
+                                "ts" : Timestamp(1654427076, 1),
+                                "t" : NumberLong(1)
+                        },
+                        "optimeDate" : ISODate("2022-06-05T11:04:36Z"),
+                        "optimeDurableDate" : ISODate("2022-06-05T11:04:36Z"),
+                        "lastAppliedWallTime" : ISODate("2022-06-05T11:04:36.297Z"),
+                        "lastDurableWallTime" : ISODate("2022-06-05T11:04:36.297Z"),
+                        "lastHeartbeat" : ISODate("2022-06-05T11:04:44.274Z"),
+                        "lastHeartbeatRecv" : ISODate("2022-06-05T11:04:43.770Z"),
+                        "pingMs" : NumberLong(3),
+                        "lastHeartbeatMessage" : "",
+                        "syncSourceHost" : "192.168.1.10:27018",
+                        "syncSourceId" : 0,
+                        "infoMessage" : "",
+                        "configVersion" : 1,
+                        "configTerm" : 1
+                }
+        ],
+        "ok" : 1,
+        "$clusterTime" : {
+                "clusterTime" : Timestamp(1654427076, 1),
+                "signature" : {
+                        "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+                        "keyId" : NumberLong(0)
+                }
+        },
+        "operationTime" : Timestamp(1654427076, 1)
+}
+mongoRepSet:PRIMARY> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+mongoRepSet:PRIMARY> use test
+switched to db test
+mongoRepSet:PRIMARY> db.test.insert({name: "user1"})
+WriteResult({ "nInserted" : 1 })
+mongoRepSet:PRIMARY> db.test.find()
+{ "_id" : ObjectId("629c8e44f0fe7da1b04dd082"), "name" : "user1" }
+mongoRepSet:PRIMARY>
